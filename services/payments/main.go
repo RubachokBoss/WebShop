@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -31,6 +32,10 @@ func main() {
 		log.Fatalf("open db: %v", err)
 	}
 	defer dbConn.Close()
+
+	if err := waitForDB(ctx, dbConn, 30*time.Second); err != nil {
+		log.Fatalf("db not ready: %v", err)
+	}
 
 	if err := db.Migrate(ctx, dbConn); err != nil {
 		log.Fatalf("db migrate: %v", err)
@@ -87,5 +92,18 @@ func declareQueues(ch *amqp.Channel) error {
 		return err
 	}
 	return nil
+}
+
+func waitForDB(ctx context.Context, db *sql.DB, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for {
+		if err := db.PingContext(ctx); err == nil {
+			return nil
+		}
+		if time.Now().After(deadline) {
+			return context.DeadlineExceeded
+		}
+		time.Sleep(time.Second)
+	}
 }
 
