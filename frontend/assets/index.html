@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GoZon Shop Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    section { margin-bottom: 24px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+    label { display: block; margin: 6px 0 2px; }
+    input { padding: 6px; width: 240px; }
+    button { padding: 6px 12px; margin-top: 8px; cursor: pointer; }
+    pre { background: #f7f7f7; padding: 12px; border-radius: 6px; }
+    h1 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>GoZon Demo (Go + RabbitMQ)</h1>
+
+  <section>
+    <h3>Account</h3>
+    <label>User ID</label>
+    <input id="userId" placeholder="user-123" />
+    <div>
+      <button onclick="createAccount()">Create account</button>
+      <button onclick="checkBalance()">Check balance</button>
+    </div>
+    <label>Deposit amount</label>
+    <input id="depositAmount" type="number" value="1000" />
+    <button onclick="deposit()">Deposit</button>
+  </section>
+
+  <section>
+    <h3>Create order</h3>
+    <label>Amount</label>
+    <input id="orderAmount" type="number" value="500" />
+    <label>Description</label>
+    <input id="orderDescription" placeholder="Gift" />
+    <button onclick="createOrder()">Create order</button>
+    <button onclick="loadOrders()">Reload orders</button>
+  </section>
+
+  <section>
+    <h3>Orders</h3>
+    <pre id="orders"></pre>
+  </section>
+
+  <section>
+    <h3>Logs</h3>
+    <pre id="log"></pre>
+  </section>
+
+  <script>
+    const logEl = document.getElementById('log');
+    function log(message) {
+      const ts = new Date().toLocaleTimeString();
+      logEl.textContent = `[${ts}] ${message}\n` + logEl.textContent;
+    }
+
+    function getUser() {
+      return document.getElementById('userId').value.trim();
+    }
+
+    async function createAccount() {
+      const user = getUser();
+      if (!user) { alert('Enter user id'); return; }
+      const res = await fetch('/payments/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user })
+      });
+      log(`Create account status ${res.status}`);
+    }
+
+    async function deposit() {
+      const user = getUser();
+      const amount = Number(document.getElementById('depositAmount').value);
+      const res = await fetch('/payments/accounts/deposit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user, amount })
+      });
+      const body = await res.json().catch(() => ({}));
+      log(`Deposit status ${res.status}: ${JSON.stringify(body)}`);
+      checkBalance();
+    }
+
+    async function checkBalance() {
+      const user = getUser();
+      const res = await fetch(`/payments/accounts/${encodeURIComponent(user)}/balance`);
+      const body = await res.json().catch(() => ({}));
+      log(`Balance ${res.status}: ${JSON.stringify(body)}`);
+    }
+
+    async function createOrder() {
+      const user = getUser();
+      const amount = Number(document.getElementById('orderAmount').value);
+      const description = document.getElementById('orderDescription').value;
+      const res = await fetch('/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user, amount, description })
+      });
+      const body = await res.json().catch(() => ({}));
+      log(`Create order ${res.status}: ${JSON.stringify(body)}`);
+      setTimeout(loadOrders, 1000);
+    }
+
+    async function loadOrders() {
+      const user = getUser();
+      const res = await fetch(`/orders?user_id=${encodeURIComponent(user)}`);
+      const body = await res.json().catch(() => []);
+      document.getElementById('orders').textContent = JSON.stringify(body, null, 2);
+    }
+  </script>
+</body>
+</html>
+

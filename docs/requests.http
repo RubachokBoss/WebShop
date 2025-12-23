@@ -1,0 +1,33 @@
+### Create account
+POST http://localhost:8080/payments/accounts
+Content-Type: application/json
+
+{
+  "user_id": "user-1"
+}
+
+### Deposit
+POST http://localhost:8080/payments/accounts/deposit
+Content-Type: application/json
+
+{
+  "user_id": "user-1",
+  "amount": 2000
+}
+
+### Create order (async payment)
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "user_id": "user-1",
+  "amount": 1500,
+  "description": "Headphones"
+}
+
+### List orders
+GET http://localhost:8080/orders?user_id=user-1
+
+### Get order
+GET http://localhost:8080/orders/1
+

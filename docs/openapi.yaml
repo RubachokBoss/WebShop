@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: GoZon Shop API
+  version: "1.0.0"
+  description: |
+    Orders + Payments microservices (Go, RabbitMQ, Postgres).
+    All endpoints are available through the gateway on http://localhost:8080.
+servers:
+  - url: http://localhost:8080
+paths:
+  /orders:
+    post:
+      summary: Create order (triggers async payment)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+      responses:
+        '200':
+          description: Created order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+    get:
+      summary: List orders for user
+      parameters:
+        - in: query
+          name: user_id
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+  /orders/{id}:
+    get:
+      summary: Get order by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Not found
+  /payments/accounts:
+    post:
+      summary: Create account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccount'
+      responses:
+        '201':
+          description: Created
+  /payments/accounts/deposit:
+    post:
+      summary: Deposit balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Deposit'
+      responses:
+        '200':
+          description: Updated balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+  /payments/accounts/{user_id}/balance:
+    get:
+      summary: Get balance
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+        '404':
+          description: Not found
+components:
+  schemas:
+    CreateOrder:
+      type: object
+      required: [user_id, amount]
+      properties:
+        user_id:
+          type: string
+        amount:
+          type: integer
+          format: int64
+        description:
+          type: string
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        amount:
+          type: integer
+          format: int64
+        description:
+          type: string
+        status:
+          type: string
+          enum: [NEW, FINISHED, CANCELLED]
+        created_at:
+          type: string
+          format: date-time
+    CreateAccount:
+      type: object
+      required: [user_id]
+      properties:
+        user_id:
+          type: string
+    Deposit:
+      type: object
+      required: [user_id, amount]
+      properties:
+        user_id:
+          type: string
+        amount:
+          type: integer
+          format: int64
+    Balance:
+      type: object
+      properties:
+        user_id:
+          type: string
+        balance:
+          type: integer
+          format: int64
+
