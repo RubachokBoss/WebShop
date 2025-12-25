@@ -7,9 +7,11 @@
 ## Архитектура
 - `orders-service` — REST заказов, transactional outbox (DB) → очередь `order.payments`, consumer статусов оплаты.
 - `payments-service` — счета/баланс, transactional inbox + outbox, consumer `order.payments`, publisher `payment.status`, идемпотентное списание.
-- `gateway` — reverse proxy (`/orders`, `/payments`, остальное → фронт).
+- `catalog-service` — каталог (Postgres), CRUD `/categories`, `/products` (поиск/фильтр/пагинация).
+- `users-service` — Postgres + JWT auth: `/register`, `/login` (bcrypt, HS256).
+- `gateway` — reverse proxy (`/orders`, `/payments`, `/catalog`, `/users`, остальное → фронт).
 - `frontend` — лёгкий SPA на чистом JS (fetch к gateway).
-- Инфраструктура: `rabbitmq`, `orders-db` (Postgres), `payments-db` (Postgres).
+- Инфраструктура: `rabbitmq`, `orders-db`, `payments-db`, `catalog-db`, `users-db` (все Postgres).
 
 Messaging:
 - Очереди: `order.payments` (tasks), `payment.status` (results).
@@ -55,7 +57,7 @@ docker compose up --build
 
 ## Стек и версии
 - Go 1.22, RabbitMQ 3-management, Postgres 15, Docker Compose.
-- Библиотеки: chi, pgx, amqp091-go, uuid.
+- Библиотеки: chi, pgx, amqp091-go, uuid, golang-jwt, bcrypt.
 
 ## Структура сервисов (слои)
 - `internal/config` — конфиг из env.

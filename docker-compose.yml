@@ -63,14 +63,59 @@ services:
       ORDERS_URL: http://orders-service:8081
       PAYMENTS_URL: http://payments-service:8082
       FRONTEND_URL: http://frontend:8083
+      CATALOG_URL: http://catalog-service:8084
+      USERS_URL: http://users-service:8085
     depends_on:
       - orders-service
       - payments-service
       - frontend
+      - catalog-service
+      - users-service
     ports:
       - "8080:8080"
+
+  catalog-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: catalog
+      POSTGRES_PASSWORD: catalog
+      POSTGRES_DB: catalog
+    volumes:
+      - catalog-data:/var/lib/postgresql/data
+
+  catalog-service:
+    build: ./services/catalog
+    environment:
+      PORT: 8084
+      DATABASE_URL: postgres://catalog:catalog@catalog-db:5432/catalog?sslmode=disable
+    depends_on:
+      - catalog-db
+    ports:
+      - "8084:8084"
+
+  users-service:
+    build: ./services/users
+    environment:
+      PORT: 8085
+      DATABASE_URL: postgres://users:users@users-db:5432/users?sslmode=disable
+      JWT_SECRET: supersecret
+    depends_on:
+      - users-db
+    ports:
+      - "8085:8085"
+
+  users-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: users
+      POSTGRES_PASSWORD: users
+      POSTGRES_DB: users
+    volumes:
+      - users-data:/var/lib/postgresql/data
 
 volumes:
   orders-data:
   payments-data:
+  catalog-data:
+  users-data:
 

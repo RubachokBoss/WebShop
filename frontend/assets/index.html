@@ -2,47 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GoZon Shop Demo</title>
+  <title>GoZon Shop</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 24px; }
-    section { margin-bottom: 24px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
-    label { display: block; margin: 6px 0 2px; }
-    input { padding: 6px; width: 240px; }
-    button { padding: 6px 12px; margin-top: 8px; cursor: pointer; }
-    pre { background: #f7f7f7; padding: 12px; border-radius: 6px; }
+    :root { color-scheme: light; }
+    body { font-family: Arial, sans-serif; margin: 24px; background: #f5f6fb; }
     h1 { margin-top: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    section { background: #fff; border: 1px solid #e2e5ed; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    label { display: block; margin: 8px 0 4px; font-weight: 600; }
+    input, textarea, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #d0d4dd; }
+    button { padding: 8px 12px; border: none; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; margin-top: 8px; }
+    button.secondary { background: #6b7280; }
+    pre { background: #f3f4f6; padding: 12px; border-radius: 8px; max-height: 240px; overflow: auto; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row input { flex: 1; }
+    .muted { color: #6b7280; font-size: 13px; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; background: #e5e7eb; margin-left: 6px; font-size: 12px; }
+    .card { border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; background: #fff; margin-bottom: 8px; }
   </style>
 </head>
 <body>
-  <h1>GoZon Demo (Go + RabbitMQ)</h1>
+  <h1>GoZon Shop</h1>
+  <div class="grid">
+    <section>
+      <h3>Auth</h3>
+      <label>Email</label>
+      <input id="email" placeholder="user@example.com">
+      <label>Password</label>
+      <input id="password" type="password" placeholder="secret123">
+      <label>Name</label>
+      <input id="name" placeholder="Alice">
+      <div class="row">
+        <button onclick="register()">Register</button>
+        <button class="secondary" onclick="login()">Login</button>
+      </div>
+      <p class="muted">Token: <span id="tokenSpan" class="tag"></span></p>
+    </section>
 
-  <section>
-    <h3>Account</h3>
-    <label>User ID</label>
-    <input id="userId" placeholder="user-123" />
-    <div>
-      <button onclick="createAccount()">Create account</button>
-      <button onclick="checkBalance()">Check balance</button>
-    </div>
-    <label>Deposit amount</label>
-    <input id="depositAmount" type="number" value="1000" />
-    <button onclick="deposit()">Deposit</button>
-  </section>
+    <section>
+      <h3>User / Account</h3>
+      <label>User ID (используем email как user_id)</label>
+      <input id="userId" placeholder="user@example.com">
+      <div class="row">
+        <button onclick="createAccount()">Create account</button>
+        <button class="secondary" onclick="checkBalance()">Balance</button>
+      </div>
+      <label>Deposit amount</label>
+      <input id="depositAmount" type="number" value="1000">
+      <button onclick="deposit()">Deposit</button>
+    </section>
 
-  <section>
-    <h3>Create order</h3>
-    <label>Amount</label>
-    <input id="orderAmount" type="number" value="500" />
-    <label>Description</label>
-    <input id="orderDescription" placeholder="Gift" />
-    <button onclick="createOrder()">Create order</button>
-    <button onclick="loadOrders()">Reload orders</button>
-  </section>
+    <section>
+      <h3>Catalog</h3>
+      <div class="row">
+        <input id="search" placeholder="Search text">
+        <button onclick="loadProducts()">Search</button>
+      </div>
+      <label>Category filter (id)</label>
+      <input id="filterCategoryId" placeholder="">
+      <button class="secondary" onclick="loadCategories()">Load categories</button>
+      <div id="categories" class="muted" style="margin-top:8px;"></div>
+      <h4 style="margin-top:12px;">Products</h4>
+      <div id="products"></div>
+    </section>
 
-  <section>
-    <h3>Orders</h3>
-    <pre id="orders"></pre>
-  </section>
+    <section>
+      <h3>Create Category</h3>
+      <label>Title</label>
+      <input id="catTitle" placeholder="Books">
+      <button onclick="createCategory()">Create</button>
+    </section>
+
+    <section>
+      <h3>Create Product</h3>
+      <label>Title</label>
+      <input id="prodTitle" placeholder="Book">
+      <label>Description</label>
+      <textarea id="prodDesc" rows="2" placeholder="Nice book"></textarea>
+      <label>Price (cents)</label>
+      <input id="prodPrice" type="number" value="1000">
+      <label>Currency</label>
+      <input id="prodCurrency" value="RUB">
+      <label>Category ID</label>
+      <input id="prodCategory" placeholder="">
+      <label>Image URL</label>
+      <input id="prodImage" placeholder="https://...">
+      <label>Stock</label>
+      <input id="prodStock" type="number" value="10">
+      <button onclick="createProduct()">Create</button>
+    </section>
+
+    <section>
+      <h3>Orders</h3>
+      <label>Amount (use product price_cents)</label>
+      <input id="orderAmount" type="number" value="1000">
+      <label>Description</label>
+      <input id="orderDescription" placeholder="Product purchase">
+      <button onclick="createOrder()">Create order</button>
+      <button class="secondary" onclick="loadOrders()">Reload orders</button>
+      <pre id="orders"></pre>
+    </section>
+  </div>
 
   <section>
     <h3>Logs</h3>
@@ -50,14 +110,58 @@
   </section>
 
   <script>
+    let token = "";
     const logEl = document.getElementById('log');
+    const tokenSpan = document.getElementById('tokenSpan');
     function log(message) {
       const ts = new Date().toLocaleTimeString();
       logEl.textContent = `[${ts}] ${message}\n` + logEl.textContent;
     }
+    function headers(json = true) {
+      const h = {};
+      if (json) h['Content-Type'] = 'application/json';
+      if (token) h['Authorization'] = 'Bearer ' + token;
+      return h;
+    }
+    function setToken(t) {
+      token = t || "";
+      tokenSpan.textContent = token ? token.slice(0,24) + '...' : 'none';
+    }
 
     function getUser() {
       return document.getElementById('userId').value.trim();
+    }
+
+    async function register() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const name = document.getElementById('name').value.trim();
+      const res = await fetch('/users/register', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ email, password, name })
+      });
+      const body = await res.json().catch(()=> ({}));
+      log(`Register ${res.status}: ${JSON.stringify(body)}`);
+      if (res.ok) {
+        document.getElementById('userId').value = email;
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const res = await fetch('/users/login', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ email, password })
+      });
+      const body = await res.json().catch(()=> ({}));
+      log(`Login ${res.status}: ${JSON.stringify(body)}`);
+      if (res.ok && body.token) {
+        setToken(body.token);
+        document.getElementById('userId').value = email;
+      }
     }
 
     async function createAccount() {
@@ -65,7 +169,7 @@
       if (!user) { alert('Enter user id'); return; }
       const res = await fetch('/payments/accounts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers(),
         body: JSON.stringify({ user_id: user })
       });
       log(`Create account status ${res.status}`);
@@ -76,7 +180,7 @@
       const amount = Number(document.getElementById('depositAmount').value);
       const res = await fetch('/payments/accounts/deposit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers(),
         body: JSON.stringify({ user_id: user, amount })
       });
       const body = await res.json().catch(() => ({}));
@@ -86,7 +190,7 @@
 
     async function checkBalance() {
       const user = getUser();
-      const res = await fetch(`/payments/accounts/${encodeURIComponent(user)}/balance`);
+      const res = await fetch(`/payments/accounts/${encodeURIComponent(user)}/balance`, { headers: headers(false) });
       const body = await res.json().catch(() => ({}));
       log(`Balance ${res.status}: ${JSON.stringify(body)}`);
     }
@@ -97,20 +201,94 @@
       const description = document.getElementById('orderDescription').value;
       const res = await fetch('/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers(),
         body: JSON.stringify({ user_id: user, amount, description })
       });
       const body = await res.json().catch(() => ({}));
       log(`Create order ${res.status}: ${JSON.stringify(body)}`);
-      setTimeout(loadOrders, 1000);
+      setTimeout(loadOrders, 800);
     }
 
     async function loadOrders() {
       const user = getUser();
-      const res = await fetch(`/orders?user_id=${encodeURIComponent(user)}`);
+      const res = await fetch(`/orders?user_id=${encodeURIComponent(user)}`, { headers: headers(false) });
       const body = await res.json().catch(() => []);
       document.getElementById('orders').textContent = JSON.stringify(body, null, 2);
     }
+
+    async function loadCategories() {
+      const res = await fetch('/catalog/categories', { headers: headers(false) });
+      const body = await res.json().catch(() => []);
+      document.getElementById('categories').textContent = body.map(c => `${c.id}: ${c.title}`).join(' | ') || '—';
+    }
+
+    async function loadProducts() {
+      const search = document.getElementById('search').value.trim();
+      const cat = document.getElementById('filterCategoryId').value.trim();
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (cat) params.set('category_id', cat);
+      const res = await fetch('/catalog/products?' + params.toString(), { headers: headers(false) });
+      const products = await res.json().catch(() => []);
+      const container = document.getElementById('products');
+      container.innerHTML = "";
+      products.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div><strong>${p.title}</strong> <span class="muted">#${p.id}</span></div>
+          <div class="muted">${p.description || ''}</div>
+          <div>${p.price_cents} ${p.currency} | stock: ${p.stock} | cat: ${p.category_id ?? '-'}</div>
+          <button onclick="prefillOrder(${p.price_cents}, '${p.title.replace(/'/g,"")}')">Buy</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function prefillOrder(price, title) {
+      document.getElementById('orderAmount').value = price;
+      document.getElementById('orderDescription').value = `Buy: ${title}`;
+      log(`Prefilled order with price ${price}`);
+    }
+
+    async function createCategory() {
+      const title = document.getElementById('catTitle').value.trim();
+      if (!title) { alert('title required'); return; }
+      const res = await fetch('/catalog/categories', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ title })
+      });
+      const body = await res.json().catch(()=> ({}));
+      log(`Create category ${res.status}: ${JSON.stringify(body)}`);
+      loadCategories();
+    }
+
+    async function createProduct() {
+      const title = document.getElementById('prodTitle').value.trim();
+      const description = document.getElementById('prodDesc').value.trim();
+      const price_cents = Number(document.getElementById('prodPrice').value);
+      const currency = document.getElementById('prodCurrency').value.trim() || 'RUB';
+      const category_id = document.getElementById('prodCategory').value.trim();
+      const image_url = document.getElementById('prodImage').value.trim();
+      const stock = Number(document.getElementById('prodStock').value);
+      const res = await fetch('/catalog/products', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({
+          title, description, price_cents, currency,
+          category_id: category_id ? Number(category_id) : null,
+          image_url, stock
+        })
+      });
+      const body = await res.json().catch(()=> ({}));
+      log(`Create product ${res.status}: ${JSON.stringify(body)}`);
+      loadProducts();
+    }
+
+    // initial loads
+    loadCategories();
+    loadProducts();
   </script>
 </body>
 </html>

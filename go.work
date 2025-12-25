@@ -1,7 +1,13 @@
 go 1.22
 
 use ./services/orders
+
 use ./services/payments
+
 use ./services/gateway
+
 use ./frontend
 
+use ./services/catalog
+
+use ./services/users
