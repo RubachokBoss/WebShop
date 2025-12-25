@@ -23,7 +23,7 @@ func main() {
 	r.Mount("/payments", http.StripPrefix("/payments", newProxy(paymentsURL)))
 	r.Mount("/catalog", http.StripPrefix("/catalog", newProxy(catalogURL)))
 	r.Mount("/users", http.StripPrefix("/users", newProxy(usersURL)))
-	// frontend catch-all
+	// Фронт ловит всё, что не сматчилось выше
 	r.NotFound(func(w http.ResponseWriter, req *http.Request) {
 		newProxy(frontendURL).ServeHTTP(w, req)
 	})

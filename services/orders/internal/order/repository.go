@@ -12,7 +12,7 @@ const (
 	StatusCancelled = "CANCELLED"
 )
 
-// DBTX captures shared methods of *sql.DB and *sql.Tx.
+// DBTX прикидывается и *sql.DB, и *sql.Tx — общий контракт
 type DBTX interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)

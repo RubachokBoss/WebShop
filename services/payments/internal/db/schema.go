@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-// Migrate sets up tables for accounts, payments, inbox/outbox.
+// Migrate поднимает таблицы для аккаунтов/платежей/inbox/outbox
 func Migrate(ctx context.Context, db *sql.DB) error {
 	schema := `
 CREATE TABLE IF NOT EXISTS accounts (

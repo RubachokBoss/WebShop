@@ -117,7 +117,7 @@ type Product struct {
 	Stock       int64  `json:"stock"`
 }
 
-// Handlers
+// Хендлеры — чтобы фронт жил и радовался
 
 func listCategories(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -418,7 +418,7 @@ func deleteProduct(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// helpers
+// Хелперы, чтоб не копипастить одно и то же
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(w)

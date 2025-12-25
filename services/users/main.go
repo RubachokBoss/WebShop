@@ -52,7 +52,7 @@ func getenv(key, def string) string {
 	return def
 }
 
-// DB + models
+// База + модельки (да, скучно, но без них никуда)
 
 type User struct {
 	ID    int64  `json:"id"`
@@ -87,7 +87,7 @@ func waitForDB(ctx context.Context, db *sql.DB, timeout time.Duration) error {
 	}
 }
 
-// Handlers
+// Хендлеры, которые дёргает фронт
 
 func register(db *sql.DB) http.HandlerFunc {
 	type req struct {
@@ -176,7 +176,7 @@ func login(db *sql.DB, jwtSecret string) http.HandlerFunc {
 	}
 }
 
-// JWT
+// JWT-шка
 func signJWT(secret string, u User) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": strconv.FormatInt(u.ID, 10),
@@ -189,7 +189,7 @@ func signJWT(secret string, u User) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// helpers
+// Хелперы, чтобы не дублировать одно и то же
 func writeJSON(w http.ResponseWriter, v any, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
