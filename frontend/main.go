@@ -21,7 +21,7 @@ func main() {
 	fsHandler := http.FileServer(http.FS(sub))
 
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// serve index for root or unknown paths
+	// Отдаём index для корня и любых мутных путей, чтобы SPA не падала
 		if r.URL.Path == "/" || path.Ext(r.URL.Path) == "" {
 			data, err := fs.ReadFile(sub, "index.html")
 			if err != nil {

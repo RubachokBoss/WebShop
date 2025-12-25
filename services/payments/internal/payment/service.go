@@ -36,7 +36,7 @@ func NewService(db *sql.DB, accounts *account.Repository, payments *Repository, 
 	return &Service{db: db, accounts: accounts, payments: payments, inbox: inbox, outboxRepo: outboxRepo}
 }
 
-// ProcessPayment implements transactional inbox + outbox with idempotency.
+// ProcessPayment — транзакционный инбокс+аутбокс с идемпотентностью, чтоб не ловить дубль списаний
 func (s *Service) ProcessPayment(ctx context.Context, task PaymentTask) error {
 	msgID, err := uuid.Parse(task.MessageID)
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *Service) ProcessPayment(ctx context.Context, task PaymentTask) error {
 	}
 	defer tx.Rollback()
 
-	// inbox deduplication
+	// Дедуп по инбоксу — одно сообщение, один заход
 	ok, err := s.inbox.TryInsert(ctx, tx, msgID)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (s *Service) ProcessPayment(ctx context.Context, task PaymentTask) error {
 		return tx.Commit()
 	}
 
-	// avoid double charge for same order
+	// Не списываем дважды за один заказ
 	exists, err := s.payments.Exists(ctx, tx, task.OrderID)
 	if err != nil {
 		return err

@@ -19,7 +19,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Mount("/orders", http.StripPrefix("/orders", newProxy(ordersURL)))
 	r.Mount("/payments", http.StripPrefix("/payments", newProxy(paymentsURL)))
-	// frontend catch-all
+	// Всё, что не схавали выше, отдаём фронту
 	r.NotFound(func(w http.ResponseWriter, req *http.Request) {
 		newProxy(frontendURL).ServeHTTP(w, req)
 	})

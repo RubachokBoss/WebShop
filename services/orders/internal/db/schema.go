@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-// Migrate creates required tables. Safe to call on startup.
+// Migrate поднимает таблицы; можно спокойно дергать при старте
 func Migrate(ctx context.Context, db *sql.DB) error {
 	schema := `
 CREATE TABLE IF NOT EXISTS orders (

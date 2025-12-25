@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// DBTX matches *sql.DB / *sql.Tx subset.
+// DBTX — общий интерфейс под DB или транзакцию
 type DBTX interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
@@ -36,7 +36,7 @@ func (r *Repository) Insert(ctx context.Context, tx DBTX, id uuid.UUID, orderID 
 	return err
 }
 
-// FetchPending returns up to limit messages locked for this transaction.
+// FetchPending возвращает пачку сообщений под этот транзакционный лок
 func (r *Repository) FetchPending(ctx context.Context, tx DBTX, limit int) ([]Message, error) {
 	rows, err := tx.QueryContext(ctx, `
 		SELECT id, payload, created_at
@@ -66,4 +66,3 @@ func (r *Repository) MarkPublished(ctx context.Context, tx DBTX, id uuid.UUID) e
 	_, err := tx.ExecContext(ctx, `UPDATE outbox SET published_at = now() WHERE id = $1`, id)
 	return err
 }
-

@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// DBTX shared subset.
+// DBTX — маленький общий интерфейс под транзакцию/DB
 type DBTX interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 }
@@ -20,7 +20,7 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// TryInsert returns true if message id was newly inserted (not processed before).
+// TryInsert вернёт true, если сообщение новое и ещё не жевали
 func (r *Repository) TryInsert(ctx context.Context, tx DBTX, id uuid.UUID) (bool, error) {
 	res, err := tx.ExecContext(ctx, `
 		INSERT INTO inbox(message_id) VALUES ($1)
